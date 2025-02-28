@@ -1,0 +1,127 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+import pandas as pd
+url='https://raw.githubusercontent.com/swoyam2609/Oil-and-Gas-Price-Analysis-and-Prediction/main/Datasets/crude.csv'
+data=pd.read_csv(url)
+data.head(1000)
+import pandas as pd
+url='https://raw.githubusercontent.com/swoyam2609/Oil-and-Gas-Price-Analysis-and-Prediction/main/Datasets/crude.csv'
+df=pd.read_csv(url)
+df.head(1000)
+df.shape
+df.drop(['Date','VolumeCrude'],axis=1,inplace=True)
+df.head()
+import pandas as pd
+if 'Date' in df.columns:
+    df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
+numerical_features = df.select_dtypes(include=['number'])
+correlation_matrix = numerical_features.corr()
+print(correlation_matrix)
+df.info()
+df['HighCrude']
+df.isnull().sum()
+df.describe()
+numerical_cols = ['OpenCrude', 'HighCrude', 'LowCrude', 'CloseCrude','VolumeCrude']
+def remove_outliers(df, numerical_cols):
+
+    numerical_cols = [col for col in numerical_cols if col in df.columns]
+    Q1 = df[numerical_cols].quantile(0.25)
+    Q3 = df[numerical_cols].quantile(0.75)
+    IQR = Q3 - Q1
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+    df = df[~((df[numerical_cols] < lower_bound) | (df[numerical_cols] > upper_bound)).any(axis=1)]
+    return df
+
+df = remove_outliers(df, numerical_cols)
+df_copy = df.copy()
+categorical_cols = data.select_dtypes(include=['datetime']).columns
+label_encoder = LabelEncoder()
+for col in categorical_cols:
+    data[col] = label_encoder.fit_transform(data[col])
+import pandas as pd
+from datetime import datetime
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+url='https://raw.githubusercontent.com/swoyam2609/Oil-and-Gas-Price-Analysis-and-Prediction/main/Datasets/crude.csv'
+df=pd.read_csv(url)
+df['Date'] = pd.to_datetime(df['Date'], errors='coerce').map(datetime.toordinal)
+X = df.drop('CloseCrude', axis=1)
+y = df['CloseCrude']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+linReg = LinearRegression()
+linReg.fit(X_train, y_train)
+y_pred=linReg.predict(X_test)
+y_pred
+predictions = linReg.predict(X_test)
+actual_values = y_test
+plt.scatter(predictions,actual_values,alpha=0.7,color='b')
+plt.xlabel('Predicted Price')
+plt.ylabel('Actual Price')
+plt.title('LinearRegression Model')
+plt.show()
+def dummies(x,df):
+    temp=pd.get_dummies(x,drop_first=True)
+    df=pd.concat([df,temp],axis=1)
+    df.drop([x],axis=1,inplace=True)
+    return df
+
+crude_lr = df.copy()
+crude_lr=dummies('OpenCrude',crude_lr)
+crude_lr=dummies('HighCrude',crude_lr)
+crude_lr=dummies('LowCrude',crude_lr)
+crude_lr=dummies('CloseCrude',crude_lr)
+crude_lr.head()
+crude_lr.shape
+linReg.score(X_train,y_train)
+linReg.score(X_test,y_test)
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
+model1 = LinearRegression()
+model2 = RandomForestRegressor()
+model1.fit(X_train, y_train)
+model2.fit(X_train, y_train)
+yPred1 = model1.predict(X_test)
+yPred2 = model2.predict(X_test)
+print('Linear Regression: ', np.sqrt(mean_squared_error(y_test, yPred1)))
+print('Random Forest: ', np.sqrt(mean_squared_error(y_test, yPred2)))
+rf = RandomForestRegressor(n_estimators=100, random_state=42)
+rf.fit(X_train, y_train)
+from sklearn.ensemble import RandomForestRegressor
+import matplotlib.pyplot as plt
+rfReg = RandomForestRegressor(n_estimators=100, random_state=42)
+rfReg.fit(X_train, y_train)
+predictions = rfReg.predict(X_test)
+actual_values = y_test
+plt.scatter(predictions, actual_values, alpha=0.7, color='r')
+plt.xlabel('Predicted Price')
+plt.ylabel('Actual Price')
+plt.title('Random Forest Regression Model')
+plt.show()
+print('Linear Regression: ', r2_score(y_test, yPred1))
+print('Random Forest: ', r2_score(y_test, yPred2))
+model1.predict([[23.04, 25.05, 22.98, 21.45, 26.87]])
+import seaborn as sns
+
+sns.scatterplot(x=y_test,y=y_pred,color='blue',label='Actual Data Points')
+plt.plot([min(y_test),max(y_test),max(y_test)],color='red',label='IdealLine')
+plt.legend()
+plt.show()
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+plt.figure(figsize=(10, 6))
+sns.boxplot(x='OpenCrude', y='CloseCrude', data=df, palette='Set2')
+plt.title('Price Distribution by OpenCrudeType')
+plt.xlabel('OpenCrudeType')
+plt.ylabel('Price')
+plt.show()
